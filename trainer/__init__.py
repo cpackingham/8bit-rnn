@@ -8,9 +8,9 @@ from librosa.output import write_wav
 # Allows multiple inputs to the model, not all need to be Tensors.
 class Trainer(object):
 
-    last_pattern = 'ep{}'
-    best_pattern = 'best-ep{}'
-    pattern = 'ep{}.wav'
+    last_pattern = 'ep{}-it{}'
+    best_pattern = 'best-ep{}-it{}'
+    pattern = 'ep{}-s{}.wav'
 
     def __init__(self, model, criterion, optimizer, dataset, checkpoints_path, samples_path, n_samples, sample_length, sample_rate,test_dataset, val_dataset, cuda=False):
         self.model = model
@@ -34,12 +34,13 @@ class Trainer(object):
     def run(self, epochs=1):
         for self.epochs in range(self.epochs + 1, self.epochs + epochs + 1):
             self.train()
-            self.model.eval()
+            self.epochs = self.epochs + 1
+          #  self.model.eval()
 
-            val_stats['last'] = self._evaluate(self.val_dataset)
-            self.stats['validation_loss'] = val_stats
-            test_stats['last'] = self._evaluate(self.test_dataset)
-            self.stats['test_loss'] = test_stats
+           # val_stats['last'] = self._evaluate(self.val_dataset)
+           # self.stats['validation_loss'] = val_stats
+           # test_stats['last'] = self._evaluate(self.test_dataset)
+           # self.stats['test_loss'] = test_stats
 
     def train(self):
         for (self.iterations, data) in \
@@ -67,25 +68,25 @@ class Trainer(object):
 
                 print("loss: " + str(loss))  
                 return loss
-            print("epoch number: " + str(self.iterations))
+            print("epoch number: " + str(self.epochs))
             print("finished batch")
             self.optimizer.zero_grad()
             self.optimizer.step(closure)
-            samples = self.generate(self.n_samples, self.sample_length) \
-              .cpu().float().numpy()
-            for i in range(self.n_samples):
-              write_wav(
-                  os.path.join(
-                      self.samples_path, self.pattern.format(self.iterations)
-                  ),
-                  samples[i, :], sr=self.sample_rate, norm=True
-              )
+           # samples = self.generate(self.n_samples, self.sample_length) \
+            #  .cpu().float().numpy()
+            #for i in range(self.n_samples):
+            #  write_wav(
+            #      os.path.join(
+            #          self.samples_path, self.pattern.format(self.epochs, self.iterations)
+            #      ),
+            #      samples[i, :], sr=self.sample_rate, norm=True
+            #  )
             #========FINISHED PROCESSING BATCH==========
             torch.save(
               self.model.state_dict(),
               os.path.join(
                 self.checkpoints_path,
-                self.last_pattern.format(self.iterations)
+                self.last_pattern.format(self.epochs, self.iterations)
               )
             )
 
@@ -97,7 +98,7 @@ class Trainer(object):
                     os.path.join(
                         self.checkpoints_path,
                         self.best_pattern.format(
-                            self.iterations
+                           self.epochs, self.iterations
                         )
                     )
                 )

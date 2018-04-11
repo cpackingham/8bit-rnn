@@ -1,0 +1,5 @@
+__pychache__/
+/datasets/8bit/*
+/results/*
+*.pyc
+*.pyo

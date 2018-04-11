@@ -1,0 +1,3 @@
+To convert a webm file into proper audio, use ffmpeg -i input.webm -vn -rf64 auto output.wav
+
+To split the file into equal length segments, use ffmpeg -i somefile.mp3 -f segment -segment_time 3 -c copy out%03d.mp3

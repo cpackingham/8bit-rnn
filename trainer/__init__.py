@@ -24,8 +24,8 @@ class Trainer(object):
         self.sample_rate = sample_rate
         self.cuda = cuda
         self.iterations = 0
+        self.stats = {"best_loss": float('inf')}
         self.epochs = 0
-        self.stats = {"validation_loss": {"last": float('inf')}, "test_loss": {"last": float("inf")}}
         self.test_dataset = test_dataset
         self.val_dataset = val_dataset
         self._best_val_loss = float('inf')
@@ -65,7 +65,7 @@ class Trainer(object):
                 batch_output = self.model(*batch_inputs)
                 loss = self.criterion(batch_output, batch_target)
                 loss.backward()
-
+                self.cur_val_loss = loss.data[0]
                 print("loss: " + str(loss))  
                 return loss
             print("epoch number: " + str(self.epochs))
@@ -90,7 +90,6 @@ class Trainer(object):
               )
             )
 
-            cur_val_loss = self.stats['validation_loss']['last']
             if cur_val_loss < self._best_val_loss:
                 self._clear(self.best_pattern.format('*', '*'))
                 torch.save(
